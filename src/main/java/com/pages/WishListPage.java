@@ -4,15 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 public class WishListPage {
 	private WebDriver driver;
+	JavascriptExecutor js = (JavascriptExecutor)driver;
 	
-	private By wishlisticon = By.xpath("//span[text()='Add to wishlist']");
-	private By wishList = By.xpath("(//a[@title='Wishlist'])[2]");
-	private By productList= By.xpath("//div[@class='product-name']//a");
+	private By wishlisticon = By.xpath("//div[@class='product-wishlist']//span[text()='Add to wishlist']");
+	private By wishList = By.xpath("(//a[@title='Wishlist'])[1]//i");
+	private By productList= By.xpath("(//tbody[@class='wishlist-items-wrapper']//tr)");
 	
 	public WishListPage(WebDriver driver) {
 		this.driver = driver;
@@ -20,30 +22,62 @@ public class WishListPage {
 
 	public void addProduct()
 	{
-		List<WebElement> ProductList = driver.findElements(wishlisticon);
-		int s=ProductList.size();
-		System.out.println(s);
-		for(int i=0;i<5;i++)
-		{
-			ProductList.get(i).click();
-		}
+		try {
+			int count=0;
+			for(int i=0;i<4;i++)
+			{
+				if(count==4)
+				{
+					break;
+				}
+				i=i-i;
+	           driver.findElements(wishlisticon).get(i).click();
+				count=count+1;
+				Thread.sleep(5000);
+			}
+	}
+	catch(Exception e)
+	{
+		System.out.print(e.getMessage());
+	}
+		
+	}
+	public void scrollDown()
+	{
+		  JavascriptExecutor js = (JavascriptExecutor) driver;
+	       js.executeScript("window.scrollBy(0,350)", "");
+	}
+	public void scrollUp()
+	{
+		  JavascriptExecutor js = (JavascriptExecutor) driver;
+	       js.executeScript("window.scrollBy(0,-350)", "");
 	}
 	
 	public void clickWishList()
 	{
 		driver.findElement(wishList).click();
 	}
-	public List<String>  getProductList()
+	public void  getProductList()
 	{
+		String price;
 		List<String> accountsList = new ArrayList<>();
-		List<WebElement> ProductTableList = driver.findElements(productList);
-		for (WebElement e : ProductTableList) {
-			String text = e.getText();
-			System.out.println(text);
-			accountsList.add(text);
-		}
-
-		return accountsList;
+		List<WebElement> rows = driver.findElements(productList);
+		int rowsize=rows.size();
+		for(int i=1;i<=rowsize;i++)
+		{
+		    List<WebElement> priceList=driver.findElements(By.xpath("(//tbody[@class='wishlist-items-wrapper']//tr)["+i+"]//td[@class='product-price']//span/bdi"));
+			int tdprice=priceList.size();
+		    for(int j=0;j<tdprice;j++)
+		    {
+		    	price=priceList.get(j).getText();
+		    	String pp=price.replace("£","");
+		    	double number = Double.parseDouble(pp);
+				System.out.println("price--"+number);
+				accountsList.add(price);
+		    }	
+		}	
+		
+		
 	}
 	
 
